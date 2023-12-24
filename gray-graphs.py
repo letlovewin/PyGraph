@@ -1,3 +1,4 @@
+import sys
 from collections import deque
 
 class Graph:
@@ -59,3 +60,29 @@ class Graph:
                         v.add(i+1)
                         q.append(i)
             return v
+    def minDistance(self,dist,sptSet):
+        min = sys.maxsize
+        min_index = 0
+        for u in range(len(self.edges)):
+            if dist[u] < min and sptSet[u]==False:
+                min = dist[u]
+                min_index = u
+        return min_index
+    def djikstra(self,origin,showPath=False):
+        if origin-1 > len(self.edges):
+            return -1
+        path = [origin]
+        dist = [sys.maxsize]*len(self.edges)
+        dist[origin-1] = 0
+        sptSet = [False]*len(self.edges)
+        for cout in range(len(self.edges)):
+            x = self.minDistance(dist,sptSet)
+            sptSet[x] = True
+            for y in range(len(self.edges)):
+                if self.edges[x][y] > 0 and sptSet[y] == False and dist[y] > dist[x] + self.edges[x][y]:
+                    dist[y] = dist[x] + self.edges[x][y]
+                    path.append(y+1)
+        if showPath==False:
+            return dist
+        else:
+            return path
