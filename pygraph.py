@@ -4,42 +4,62 @@ from collections import deque
 class Graph:
     def __init__(self,vertices=[],edges=[]):
         self.vertices = vertices
-        self.edges = [[0 for _ in range(len(vertices))] for __ in range(len(vertices))]
+        if edges==[]:
+            self.edges = [[0 for _ in range(len(vertices))] for __ in range(len(vertices))]
+        else:
+            self.edges = []
+        self.completeness = (len(self.edges))==((1/2)*(len(self.edges)*(len(self.edges)-1)))
+    def generateAdjacencyMatrix(self,vertices):
+        self.edges = [[0 for _ in range(vertices)] for __ in range(vertices)]
     def deg(self,v):
         if v < 0 or v >= len(self.edges):
-            return -1
+            raise Exception("Provided vertex doesn't exist")
         return len(self.edges[v])
+    def createVertex(self):
+        for i in self.edges:
+            i.append(0)
+        self.edges.append([0 for _ in range(len(self.edges)+1)])
+        self.vertices.append(len(self.edges)-1)
     def addUndirectedEdge(self,u,v,weight=1):
-        if u > len(self.edges):
+        if not u in self.vertices:
             for i in self.edges:
                 i.append(0)
             self.edges.append([0 for _ in range(len(self.edges)+1)])
-        if v > len(self.edges):
+            self.vertices.append(u)
+        if not v in self.vertices:
             for i in self.edges:
                 i.append(0)
             self.edges.append([0 for _ in range(len(self.edges)+1)])
+            self.vertices.append(v)
         #Dynamic resizing of adjacency matrix if u or v isn't in our set of vertices.
         self.edges[u-1][v-1] = weight
         self.edges[v-1][u-1] = weight
     def addDirectedEdge(self,u,v,weight=1):
-        if u > len(self.edges):
+        if not u in self.vertices:
             for i in self.edges:
                 i.append(0)
             self.edges.append([0 for _ in range(len(self.edges)+1)])
-        if v > len(self.edges):
+            self.vertices.append(u)
+        if not v in self.vertices:
             for i in self.edges:
                 i.append(0)
             self.edges.append([0 for _ in range(len(self.edges)+1)])
+            self.vertices.append(v)
         #Dynamic resizing of adjacency matrix if u or v isn't in our set of vertices.
         self.edges[u-1][v-1] = weight
     def isEdge(self,u,v):
-        if u > len(self.edges) or v > len(self.edges):
-            return False
-        if self.edges[u][v] != 0:
+        if not u in self.vertices or not v in self.vertices:
+            raise Exception("Provided vertex doesn't exist.")
+        if self.edges[u-1][v-1] != 0:
             return True
         else:
             return False
+    def isComplete(self):
+        N = len(self.edges)
+        return N==((1/2)*(N*(N-1)))
     def traverse(self,origin,type='bft'):
+        if origin-1 < 0 or origin-1 >= len(self.edges):
+            raise Exception("Provided origin vertex does not exist.")
         if type=='bft':
             q = deque([origin])
             v = set([origin])
@@ -86,3 +106,34 @@ class Graph:
             return dist
         else:
             return path
+    def generateTopologicalSort(self): #Kahn's algorithm for topological sorting
+        N = len(self.vertices)
+        in_degree = [0]*N
+        for i in range(N):
+            for j in self.edges:
+                if j[i]!=0:
+                    in_degree[i] += 1
+        queue = deque()
+        for i in range(N):
+            if in_degree[i]==0:
+                queue.append(i)
+        cnt = 0
+        top_sort = []
+        while queue:
+            u = queue.popleft()
+            top_sort.append(u+1)
+            for i in range(N):
+                if self.edges[u][i] != 0:
+                    in_degree[i] -= 1
+                    if in_degree[i]==0 and i!=u:
+                        queue.append(i)
+            cnt += 1
+        if cnt!=N:
+            return([-1])
+        return top_sort
+    def generateSpanningTree(self):
+        #Prims algorithm
+        src = self.vertices[0]
+        mstSet = set([src])
+
+
