@@ -69,57 +69,49 @@ class Graph:
         if type=='bft':
             q = deque([origin])
             v = set([origin])
-            path = [origin]
             while q:
                 k = q.pop()
                 for i in range(len(self.edges[k])):
-                    if not i+1 in v:
+                    if not i+1 in v and self.edges[k][i]!=0:
                         v.add(i+1)
                         q.appendleft(i)
-                        path.append(i+1)
-            return path
+            return v
         elif type=='dft':
             q = [origin]
             v = set([origin])
-            path = [origin]
             while q:
                 k = q.pop()
                 for i in range(len(self.edges[k])):
-                    if not i+1 in v:
+                    if not i+1 in v and self.edges[k][i]!=0:
                         v.add(i+1)
                         q.append(i)
-                        path.append(i+1)
-            return path
+            return v
     def search(self,origin,target,type='bft'):
         if origin-1 < 0 or origin-1 >= len(self.edges):
             raise Exception("Provided origin vertex does not exist.")
         if type=='bft':
             q = deque([origin])
             v = set([origin])
-            path = [origin]
             while q:
                 k = q.pop()
                 for i in range(len(self.edges[k])):
-                    if not i+1 in v:
+                    if not i+1 in v and self.edges[k][i]!=0:
                         v.add(i+1)
                         q.append(i)
-                        path.add(i+1)
                         if i+1==target:
-                            return path
+                            return v
             return [-1]
         elif type=='dft':
             q = [origin]
             v = set([origin])
-            path = [origin]
             while q:
                 k = q.pop()
                 for i in range(len(self.edges[k])):
-                    if not i+1 in v:
+                    if not i+1 in v and self.edges[k][i]!=0:
                         v.add(i+1)
                         q.append(i)
-                        path.add(i+1)
                         if i+1==target:
-                            return path
+                            return v
             return [-1]
         else:
             raise Exception("Invalid traversal type.")
@@ -214,7 +206,7 @@ class Graph:
             return D
         else:
             raise Exception("self.edgeType is undefined, likely because you haven't initialized an adjacency matrix.")
-    def generateRandomGraph(self,isAcyclic,isWeighted,connectionType,allowSelfPath=False,lowerBound=1,upperBound=64,disjointPossible=True):
+    def generateRandomGraph(self,isWeighted,connectionType,allowSelfPath=False,lowerBound=1,upperBound=64):
         if lowerBound>upperBound:
             raise Exception("lowerBound for generation of random graph must be greater than upperBound")
         if lowerBound<1:
@@ -225,7 +217,11 @@ class Graph:
         for i in range(7):
             y1 = random.randrange(0,V-1)
             x1 = random.randrange(0,V-1)
-            W = random.randrange(1,512)
+            if x1==y1 and allowSelfPath==False:
+                continue
+            W = 1
+            if isWeighted==True:
+                W = random.randrange(1,512)
             if connectionType=='undirected':
                 A[y1][x1] = W
                 A[x1][y1] = W
@@ -234,7 +230,14 @@ class Graph:
         self.edges = A
         self.vertices = [i+1 for i in range(V)]
         self.edgeType = connectionType
-    def generateSpanningTree(self):
+    def generateEulerianTrail(self):
+        pass
+    def checkIfDisjoint(self):
+        result = self.traverse(1)
+        if len(result)<len(self.vertices):
+            return True
+        return False
+    def generateMinimumSpanningTree(self):
         #Prims algorithm
         src = self.vertices[0]
         mstSet = set([src])
