@@ -233,10 +233,25 @@ class Graph:
     def generateEulerianTrail(self):
         pass
     def checkIfDisjoint(self):
+        if self.edges==None:
+            raise Exception("Adjacency matrix hasn't been generated!")
         result = self.traverse(1)
         if len(result)<len(self.vertices):
             return True
         return False
+    def findConnectedComponents(self):
+        if self.edges==None:
+            raise Exception("Adjacency matrix hasn't been generated!")
+        C = []
+        V = set()
+        for i in range(len(self.vertices)):
+            Ve = i+1
+            if not Ve in V:
+                P = self.traverse(Ve)
+                C.append(P)
+                for j in P:
+                    V.add(j)
+        return C
     def generateMinimumSpanningTree(self):
         #Prims algorithm
         src = self.vertices[0]
